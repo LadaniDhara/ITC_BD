@@ -4,7 +4,7 @@ The workflow follows a progression from the personal branch to development, and 
 
 # Best Practices
 
-* Always pull the latest changes before starting new work into personal branch.
+* Always pull the latest changes before starting new work into personal forked repo.
 
 * Use meaningful commit messages.
 
