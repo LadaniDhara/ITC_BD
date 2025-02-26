@@ -4,11 +4,13 @@ The workflow follows a progression from the personal branch to development, and 
 
 # Best Practices
 
-* Always pull the latest changes before starting new work.
+* Always pull the latest changes before starting new work into personal branch.
 
 * Use meaningful commit messages.
 
-* Test thoroughly before merging into main.
+* Test thoroughly before merging into development.
+
+* Test development branch thoroughly before merging into main.
 
 * Resolve merge conflicts carefully.
 
