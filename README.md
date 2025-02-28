@@ -31,3 +31,6 @@ my_python_project/
 │── .gitignore               # Ignore unnecessary files
 │── .env                     # API credentials (DO NOT COMMIT)
 │── venv/                    # Virtual environment
+
+1. please run the requirements.txt file before progressing with the project.
+    the command is pip install -r requirements.txt
