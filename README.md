@@ -16,3 +16,18 @@ The workflow follows a progression from the personal branch to development, and 
 
 Following this workflow ensures a structured development process while maintaining code stability. Happy coding!
 
+the project setup:
+
+my_python_project/       
+│── src/                   
+│   ├── __init__.py          # Package initializer
+│   ├── main.py              # Main script
+│   ├── tfl_status.py        # API call logic
+│   ├── utils.py             # Helper functions
+│── tests/                   
+│   ├── test_tfl_status.py   # Unit test for TfL API
+│── requirements.txt         # Dependencies (requests, python-dotenv)
+│── README.md                # Project description
+│── .gitignore               # Ignore unnecessary files
+│── .env                     # API credentials (DO NOT COMMIT)
+│── venv/                    # Virtual environment

@@ -1,0 +1,3 @@
+requests
+python-dotenv
+unittest  # This is for testing; though Python's built-in unittest module doesn't need installation, some environments might require it.
