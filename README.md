@@ -32,5 +32,21 @@ my_python_project/
 │── .env                     # API credentials (DO NOT COMMIT)
 │── venv/                    # Virtual environment
 
+
+
+
+
 1. please run the requirements.txt file before progressing with the project.
     the command is pip install -r requirements.txt
+
+
+
+
+WHAT IS HAPPENING IN THE CODE AND IT'S EXPLANATION:
+
+This python project will gather data from the TFL API
+The tfl_status.py file fetches data from tfl API using 'requests' it stores the data as JSON
+When tfl_status.py fetches the JSON data from the TfL API, it will be stored locally on your machine before being uploaded to HDFS. By default, the file tfl_data.json will be saved in the root of your project directory (same location where you run your script).
+
+After saving the data locally, we now need to upload it to HDFS for this we have the hdfs_handler.py We need to have hadoop running in our system before it can be saved to hdfs otherwise the code will fail. If you are working on your local machine, you need Hadoop installed and HDFS running.
+
