@@ -3,7 +3,7 @@ pipeline {
     environment {
         SCRIPT_PATH = "statuswithdelay.py"  // Relative path within your repository (no need for ITC_BD/ prefix)
         CSV_FILE = "tfl_realtime_data_underground.csv"  // Relative path within your repository (no need for ITC_BD/ prefix)
-        REMOTE_HDFS_PATH = "/tmp/big_datajan2025/TFL/TFLUnderground"  // HDFS path
+        REMOTE_HDFS_PATH = "/tmp/big_datajan2025/TFL/TFLUnderground/tfl_realtime_data_underground.csv"  // HDFS path to the target CSV file
     }
     stages {
         stage('Collect Data') {
@@ -14,10 +14,10 @@ pipeline {
         }
         stage('Upload to HDFS') {
             steps {
-                // Upload the CSV file directly to HDFS
+                // Upload the CSV file directly to HDFS and append the new data
                 sh """
                 hdfs dfs -mkdir -p ${REMOTE_HDFS_PATH}
-                hdfs dfs -put -f ${CSV_FILE} ${REMOTE_HDFS_PATH}/tfl_realtime_data_underground.csv
+                hdfs dfs -appendToFile ${CSV_FILE} ${REMOTE_HDFS_PATH}
                 """
             }
         }
