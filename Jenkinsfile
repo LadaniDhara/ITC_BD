@@ -1,25 +1,32 @@
 pipeline {
     agent any
     environment {
-        SCRIPT_PATH = "statuswithdelay.py"  // Relative path within your repository (no need for ITC_BD/ prefix)
-        CSV_FILE = "tfl_realtime_data_underground.csv"  // Relative path within your repository (no need for ITC_BD/ prefix)
-        REMOTE_HDFS_PATH = "/tmp/big_datajan2025/TFL/TFLUnderground"  // HDFS path to the target CSV file
+        SCRIPT_PATH = "statuswithdelay.py"
+        REMOTE_HDFS_FILE = "/tmp/big_datajan2025/TFL/TFLUnderground/tfl_realtime_data_underground.csv"  // Full path with filename
+        LOCAL_TEMP_FILE = "merged_tfl_data.csv"
     }
     stages {
-        stage('Collect Data') {
+        stage('Collect Data & Upload to HDFS') {
             steps {
-                // Run the Python script to collect data
-                sh "python3 ${SCRIPT_PATH}"
+                script {
+                    def fileExists = sh(script: "hdfs dfs -test -e ${REMOTE_HDFS_FILE} && echo 'EXIST' || echo 'MISSING'", returnStdout: true).trim()
+
+                    if (fileExists == "EXIST") {
+                        // Merge new data with existing HDFS file
+                        sh """
+                        hdfs dfs -cat ${REMOTE_HDFS_FILE} > ${LOCAL_TEMP_FILE}  // Download existing data
+                        python3 ${SCRIPT_PATH} >> ${LOCAL_TEMP_FILE}  // Append new data from Python script
+                        hdfs dfs -put -f ${LOCAL_TEMP_FILE} ${REMOTE_HDFS_FILE}  // Upload merged file
+                        """
+                    } else {
+                        // First-time upload
+                        sh "python3 ${SCRIPT_PATH} | hdfs dfs -put - ${REMOTE_HDFS_FILE}"
+                    }
+                }
             }
         }
-        stage('Upload to HDFS') {
-            steps {
-                // Upload the CSV file directly to HDFS and append the new data
-                sh """
-                hdfs dfs -mkdir -p ${REMOTE_HDFS_PATH}
-                hdfs dfs -appendToFile ${CSV_FILE} ${REMOTE_HDFS_PATH}/tfl_realtime_data_underground.csv
-                """
-            }
-        }
+    }
+    triggers {
+        cron('H/30 * * * *')  // Runs every 30 minutes
     }
 }
