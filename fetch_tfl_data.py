@@ -4,8 +4,17 @@ from datetime import datetime
 import re
 import os
 
-# API Call for Line Status
+# API URLs
 URL_STATUS = "https://api.tfl.gov.uk/Line/Mode/tube/Status"
+
+# HDFS Directory Path
+HDFS_DIRECTORY = "/tmp/big_datajan2025/TFL/TFLUnderground"
+
+# Get current timestamp for file naming
+timestamp = datetime.now().strftime("%Y%m%d_%H%M")
+csv_filename = f"underground_{timestamp}.csv"
+local_csv_path = f"/tmp/{csv_filename}"  # Store locally before moving to HDFS
+hdfs_file_path = f"{HDFS_DIRECTORY}/{csv_filename}"
 
 # Function to get stations for a given line
 def get_line_route(line_id):
@@ -13,60 +22,48 @@ def get_line_route(line_id):
     response_route = requests.get(url_route)
     data_route = response_route.json()
     
-    # Extract station names
     return [stop["commonName"] for stop in data_route]
 
-# CSV File Name (local)
-LOCAL_CSV_FILE = "tfl_realtime_data_underground.csv"
-
-# HDFS Target Path
-HDFS_CSV_FILE = "/tmp/big_datajan2025/TFL/TFLUnderground/tfl_realtime_data_underground.csv"
-
 # Prepare data rows
-rows = []
-timestamp = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+rows = [["Timestamp", "Line", "Status", "Reason", "Delay Time (Minutes)", "Route (Stations)"]]
 
-# Regex pattern to extract delay time (in minutes) from reason description
+# Regex pattern to extract delay time
 DELAY_PATTERN = r"(\d+)\s?minute[s]?\s?delay"
 
-# Fetch data
+# Fetch TfL Underground status data
 response_status = requests.get(URL_STATUS)
 data_status = response_status.json()
 
 for line in data_status:
     line_name = line["name"]
     line_id = line["id"]
-    
-    # Get stations for this line
     stations = get_line_route(line_id)
-    stations_str = ", ".join(stations)  
+    stations_str = ", ".join(stations)
 
     for status in line["lineStatuses"]:
         status_description = status["statusSeverityDescription"]
         reason = status.get("reason", "No Delay")
 
-        # Extract delay time if available
+        # Extract delay time if present
         delay_time = "N/A"
         match = re.search(DELAY_PATTERN, reason, re.IGNORECASE)
         if match:
-            delay_time = match.group(1)  
+            delay_time = match.group(1)
 
-        # Append the row
-        rows.append([timestamp, line_name, status_description, reason, delay_time, stations_str])
+        # Append row to CSV data
+        rows.append([datetime.now().strftime("%Y-%m-%d %H:%M:%S"), line_name, status_description, reason, delay_time, stations_str])
 
-# Write data to CSV (Append mode)
-write_header = not os.path.exists(LOCAL_CSV_FILE)
-
-with open(LOCAL_CSV_FILE, mode="a", newline="", encoding="utf-8") as file:
+# Write data to local CSV
+with open(local_csv_path, mode="w", newline="", encoding="utf-8") as file:
     writer = csv.writer(file)
-    if write_header:
-        writer.writerow(["Timestamp", "Line", "Status", "Reason", "Delay Time (Minutes)", "Route (Stations)"])
     writer.writerows(rows)
 
-print(f"Data saved to {LOCAL_CSV_FILE}")
+print(f"Data saved locally: {local_csv_path}")
 
-# Append CSV to HDFS
-os.system(f"hdfs dfs -test -e {HDFS_CSV_FILE} || hdfs dfs -touchz {HDFS_CSV_FILE}")  # Ensure file exists
-os.system(f"hdfs dfs -appendToFile {LOCAL_CSV_FILE} {HDFS_CSV_FILE}")
+# Ensure HDFS directory exists
+os.system(f"hdfs dfs -mkdir -p {HDFS_DIRECTORY}")
 
-print(f"Data appended to HDFS: {HDFS_CSV_FILE}")
+# Upload to HDFS
+os.system(f"hdfs dfs -put {local_csv_path} {hdfs_file_path}")
+
+print(f"Data stored in HDFS: {hdfs_file_path}")
