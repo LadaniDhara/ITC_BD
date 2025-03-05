@@ -1,0 +1,18 @@
+pipeline {
+    agent any
+    environment {
+        SCRIPT_PATH = "district_delay.py"
+    }
+    stages {
+        stage('Fetch & Store Data in HDFS') {
+            steps {
+                script {
+                    sh "python3 ${SCRIPT_PATH}"
+                }
+            }
+        }
+    }
+    triggers {
+        cron('H/5 * * * *')  // Runs every 5 minutes
+    }
+}
