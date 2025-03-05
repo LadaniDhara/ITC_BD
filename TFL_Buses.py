@@ -2,11 +2,21 @@ import requests
 import csv
 from datetime import datetime
 import re
+import os
 
 # API Call for Bus Line Status
 print("Fetching bus line status...")
 url_status = "https://api.tfl.gov.uk/Line/Mode/bus/Status"
 response_status = requests.get(url_status)
+
+HDFS_DIRECTORY = "/tmp/big_datajan2025/TFL/TFL_Buses"
+
+# Get current timestamp for file naming
+timestamp = datetime.now().strftime("%Y%m%d_%H%M")
+csv_filename = f"underground_{timestamp}.csv"
+local_csv_path = f"/tmp/{csv_filename}"  # Store locally before moving to HDFS
+hdfs_file_path = f"{HDFS_DIRECTORY}/{csv_filename}"
+
 
 if response_status.status_code == 200:
     data_status = response_status.json()
@@ -88,3 +98,17 @@ with open(csv_file, mode="a", newline="", encoding="utf-8") as file:
 
 print(f"Data successfully saved to {csv_file}")
 
+# Write data to local CSV
+with open(local_csv_path, mode="w", newline="", encoding="utf-8") as file:
+    writer = csv.writer(file)
+    writer.writerows(rows)
+
+print(f"Data saved locally: {local_csv_path}")
+
+# Ensure HDFS directory exists
+os.system(f"hdfs dfs -mkdir -p {HDFS_DIRECTORY}")
+
+# Upload to HDFS
+os.system(f"hdfs dfs -put {local_csv_path} {hdfs_file_path}")
+
+print(f"Data stored in HDFS: {hdfs_file_path}")
