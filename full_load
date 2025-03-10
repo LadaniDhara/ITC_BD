@@ -1,0 +1,71 @@
+import os
+import pandas as pd
+import psycopg2
+from psycopg2.extras import execute_values
+
+# PostgreSQL Connection Details
+DB_CONFIG = {
+    "dbname": "testdb",
+    "user": "consultants",
+    "password": "WelcomeItc@2022",
+    "host": "18.170.23.150",
+    "port": "5432"
+}
+
+# ✅ Correct Local Path for Windows
+csv_file_path = r"C:\Users\amolp\Downloads\generated_tfl_status.csv"
+
+# ✅ Check if the file exists
+if not os.path.exists(csv_file_path):
+    raise FileNotFoundError(f"❌ CSV file not found at {csv_file_path}")
+
+# ✅ Load CSV file (skip first row to fix headers)
+df = pd.read_csv(csv_file_path, skiprows=1, encoding="utf-8")
+
+# ✅ Rename columns for PostgreSQL compatibility
+df.columns = ["timestamp", "line_name", "status_description", "reason", "delay_time", "stations"]
+
+# ✅ Convert 'timestamp' column to datetime format
+df["timestamp"] = pd.to_datetime(df["timestamp"], errors="coerce")
+
+# ✅ Replace NaT (invalid timestamps) with None (NULL in PostgreSQL)
+df["timestamp"] = df["timestamp"].apply(lambda x: None if pd.isnull(x) else x)
+
+# ✅ Convert 'delay_time' to integer (handling missing values)
+df["delay_time"] = pd.to_numeric(df["delay_time"], errors="coerce").fillna(0).astype(int)
+
+# ✅ Convert NaN values to None for PostgreSQL compatibility
+data_list = df.replace({pd.NA: None}).to_records(index=False).tolist()
+
+# ✅ Connect to PostgreSQL
+conn = psycopg2.connect(**DB_CONFIG)
+cur = conn.cursor()
+
+# ✅ Step 1: Create a **new table** without any constraints
+cur.execute("""
+    CREATE TABLE IF NOT EXISTS tfl_tube_status_new (
+        id SERIAL PRIMARY KEY,
+        timestamp TIMESTAMP,
+        line_name VARCHAR(100),
+        status_description TEXT,
+        reason TEXT,
+        delay_time INT,
+        stations TEXT
+    );
+""")
+conn.commit()
+
+# ✅ Step 2: Bulk Insert Data into PostgreSQL using execute_values
+query = """
+    INSERT INTO tfl_tube_status_new (timestamp, line_name, status_description, reason, delay_time, stations)
+    VALUES %s;
+"""
+
+execute_values(cur, query, data_list)
+
+# ✅ Commit changes and close DB connection
+conn.commit()
+cur.close()
+conn.close()
+
+print("✅ Data successfully inserted into PostgreSQL!")
