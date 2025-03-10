@@ -21,11 +21,10 @@ def get_line_route(line_id):
     url_route = f"https://api.tfl.gov.uk/Line/{line_id}/StopPoints"
     response_route = requests.get(url_route)
     data_route = response_route.json()
-    
     return [stop["commonName"] for stop in data_route]
 
 # Prepare data rows
-rows = [["Record_ID", "Timedetails", "Line", "Status", "Reasons", "Delay Time (Minutes)", "Route (Stations)"]] 
+rows = []
 
 # Regex pattern to extract delay time
 DELAY_PATTERN = r"(\d+)\s?minute[s]?\s?delay"
@@ -41,7 +40,7 @@ for line in data_status:
     line_name = line["name"]
     line_id = line["id"]
     stations = get_line_route(line_id)
-    stations_str = ", ".join(stations)
+    stations_str = ", ".join(stations).replace('"', '').strip()  # Remove unwanted quotes
 
     for status in line["lineStatuses"]:
         status_description = status["statusSeverityDescription"]
@@ -55,20 +54,29 @@ for line in data_status:
 
         # Append row to CSV data
         rows.append([
-            record_id, 
-            datetime.now().strftime("%Y-%m-%d %H:%M:%S"), 
-            line_name, 
-            status_description, 
-            reason, 
-            delay_time, 
+            record_id,
+            datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
+            line_name,
+            status_description,
+            reason,
+            delay_time,
             stations_str
         ])
 
         record_id += 1
 
+# Check if local file exists
+file_exists = os.path.exists(local_csv_path)
+
 # Write data to local CSV
-with open(local_csv_path, mode="w", newline="", encoding="utf-8") as file:
+with open(local_csv_path, mode="a", newline="", encoding="utf-8") as file:
     writer = csv.writer(file)
+
+    # Write headers only if the file does not exist
+    if not file_exists:
+        writer.writerow(["Record_ID", "Timedetails", "Line", "Status", "Reasons", "Delay Time (Minutes)", "Route (Stations)"])
+
+    # Append rows without headers if the file already exists
     writer.writerows(rows)
 
 print(f"Data saved locally: {local_csv_path}")
