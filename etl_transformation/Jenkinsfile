@@ -3,7 +3,7 @@ pipeline {
     stages {
         stage('Run PySpark Transformation') {
             steps {
-                sh 'python etl_transformation/hive_etl.py'
+                sh 'hive_etl.py'
             }
         }
     }
