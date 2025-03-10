@@ -1,0 +1,53 @@
+#!/bin/bash
+
+# Variables
+HOSTNAME="18.170.23.150"
+DBNAME="testdb"
+USERNAME="consultants"
+PASSWORD="WelcomeItc@2022"
+TABLE="pack_t"
+HDFS_DIR="/tmp/big_datajan2025/ITC_Amol/inc_1"
+HIVE_DATABASE="amol"
+HIVE_TABLE="amol_ext555"
+HIVE_URL="jdbc:hive2://ip-172-31-14-3.eu-west-2.compute.internal:10000/${HIVE_DATABASE}"
+
+# Fetch the maximum value from Hive (using column `name`)
+LAST_VALUE=$(beeline -u "${HIVE_URL}" --silent=true -e "SELECT MAX(name) FROM amol_ext555;" | awk 'NF{print $NF}' | tail -n 1)
+
+# Handle NULL or empty values
+if [[ -z "$LAST_VALUE" || "$LAST_VALUE" == "NULL" ]]; then
+    echo "No valid 'name' value found in Hive. Defaulting to 0."
+    LAST_VALUE=0
+fi
+
+echo "Last recorded name from Hive: $LAST_VALUE"
+echo "Starting new import from num greater than $LAST_VALUE"
+
+# Perform the incremental Sqoop import (using column `num` in PostgreSQL)
+sqoop import --connect jdbc:postgresql://18.170.23.150:5432/testdb \
+  --username consultants --password WelcomeItc@2022 \
+  --table pack_t --m 1 --target-dir ${HDFS_DIR} \
+  --incremental append --check-column num --last-value $LAST_VALUE --as-textfile
+
+# Check if the Sqoop import was successful
+if [ $? -eq 0 ]; then
+    echo "Sqoop Incremental Import Successful"
+    
+    # Check if the HDFS directory has data
+    HDFS_COUNT=$(hdfs dfs -count ${HDFS_DIR} | awk '{print $2}')
+    if [ $HDFS_COUNT -gt 0 ]; then
+        echo "New data found in HDFS directory: ${HDFS_DIR}"
+        
+        # Load new data into Hive table
+        echo "Loading new data into Hive table: ${HIVE_DATABASE}.${HIVE_TABLE}"
+        beeline -u "${HIVE_URL}" \
+          -e "LOAD DATA INPATH '${HDFS_DIR}' INTO TABLE ${HIVE_DATABASE}.${HIVE_TABLE};"
+        
+        echo "Data successfully loaded into Hive table: ${HIVE_DATABASE}.${HIVE_TABLE}"
+    else
+        echo "No new data found in HDFS directory: ${HDFS_DIR}"
+    fi
+else
+    echo "Sqoop Incremental Import Failed"
+    exit 1
+fi
