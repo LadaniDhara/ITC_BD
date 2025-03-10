@@ -1,7 +1,7 @@
 pipeline {
     agent any
     environment {
-        SCRIPT_PATH = "TFL_Underground.py"
+        SCRIPT_PATH = "fetch_tfl_data.py"
     }
     stages {
         stage('Fetch & Store Data in HDFS') {
