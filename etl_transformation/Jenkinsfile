@@ -1,12 +1,7 @@
 pipeline {
     agent any
     stages {
-        stage('Clone Repository') {
-            steps {
-                git 'https://github.com/LadaniDhara/ITC_BD/tree/muazrana'
-            }
-        }
-        stage('Run PySpark ETL') {
+        stage('Run PySpark Transformation') {
             steps {
                 sh 'python etl_transformation/hive_etl.py'
             }
