@@ -25,7 +25,7 @@ def get_line_route(line_id):
     return [stop["commonName"] for stop in data_route]
 
 # Prepare data rows
-rows = [["Timestamp", "Line", "Status", "Reason", "Delay Time (Minutes)", "Route (Stations)"]]
+rows = [["Timedetails", "Line", "Status", "Reason", "Delay Time (Minutes)", "Route (Stations)"]]
 
 # Regex pattern to extract delay time
 DELAY_PATTERN = r"(\d+)\s?minute[s]?\s?delay"
