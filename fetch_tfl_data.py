@@ -8,7 +8,7 @@ import os
 URL_STATUS = "https://api.tfl.gov.uk/Line/Mode/tube/Status"
 
 # HDFS Directory Path
-HDFS_DIRECTORY = "/tmp/big_datajan2025/TFL/TFLUnderground"
+HDFS_DIRECTORY = "/tmp/big_datajan2025/TFL/TFL_UndergroundRecord"
 
 # Get current timestamp for file naming
 timestamp = datetime.now().strftime("%Y%m%d_%H%M")
