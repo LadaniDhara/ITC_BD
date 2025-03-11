@@ -10,10 +10,7 @@ try:
 except Exception as e:
     print("Error occurred during Hive operations")
 
-# Example Transformation: Convert all status descriptions to uppercase
-df_transformed = df.withColumn("status", upper(col("status")))
-
-df_transformed = df_transformed.withColumn("status", upper(col("status"))) \
+df_transformed = df.withColumn("status", upper(col("status"))) \
     .withColumn("record_id", monotonically_increasing_id() + 1)
 
 try:
