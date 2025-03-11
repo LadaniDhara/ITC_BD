@@ -35,9 +35,9 @@ except Exception as e:
 transformed_df = df.withColumn("status", upper(col("status")))
 
 # Save transformed data to new Hive table
-transformed_df.write.mode("overwrite").saveAsTable("default.tfl_undergroundresult")
+transformed_df.write.mode("overwrite").saveAsTable("default.tfl_underground_result")
 
-print("✅ Transformation complete. Data saved to default.tfl_undergroundresult.")
+print("✅ Transformation complete. Data saved to default.tfl_underground_result.")
 
 # Stop Spark session
 spark.stop()
