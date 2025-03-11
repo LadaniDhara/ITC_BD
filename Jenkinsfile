@@ -21,7 +21,7 @@ pipeline {
         stage('Run PySpark Transformation') {
             steps {
                 sh '''
-                export SPARK_HOME=/usr/bin/
+                export SPARK_HOME=/opt/spark/
                 export PYSPARK_PYTHON=python3
                 export PATH=$SPARK_HOME/bin:$PATH
                 python3 hive_etl.py  // ✅ Run the PySpark script
