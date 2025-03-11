@@ -1,5 +1,10 @@
 pipeline {
     agent any
+    environment {
+        SPARK_HOME = "/path/to/spark"  // ✅ Set the correct path to your Spark installation
+        PYSPARK_PYTHON = "python3"  // ✅ Ensure Python3 is used
+        PATH = "$SPARK_HOME/bin:$PATH"
+    }
     stages {
         stage('Checkout') {
             steps {
@@ -15,7 +20,12 @@ pipeline {
         }
         stage('Run PySpark Transformation') {
             steps {
-                sh 'python3 hive_etl.py'  // ✅ Run the PySpark script
+                sh '''
+                export SPARK_HOME=/usr/bin/spark
+                export PYSPARK_PYTHON=python3
+                export PATH=$SPARK_HOME/bin:$PATH
+                python3 hive_etl.py  // ✅ Run the PySpark script
+                '''
             }
         }
     }
