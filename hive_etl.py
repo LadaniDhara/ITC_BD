@@ -6,8 +6,8 @@ spark = SparkSession.builder \
     .appName("TfL Underground ETL") \
     .enableHiveSupport() \
     .getOrCreate()
-    # .config("spark.sql.warehouse.dir", "/user/hive/warehouse")  # Commented out
-    # .config("spark.hadoop.hive.metastore.uris", "thrift://18.170.23.150:9083")  # Commented out
+    # .config("spark.sql.warehouse.dir", "/user/hive/warehouse")  # Uncomment if needed
+    # .config("spark.hadoop.hive.metastore.uris", "thrift://18.170.23.150:9083")  # Uncomment if needed
 
 # Log available databases and tables to verify connection
 databases = spark.sql("SHOW DATABASES")
@@ -38,6 +38,10 @@ transformed_df = df.withColumn("status", upper(col("status")))
 transformed_df.write.mode("overwrite").saveAsTable("default.tfl_undergroundresult")
 
 print("✅ Transformation complete. Data saved to default.tfl_undergroundresult.")
+
+# Verify if the table is created
+print("Tables in default after transformation:")
+spark.sql("SHOW TABLES IN default").show()
 
 # Stop Spark session
 spark.stop()
