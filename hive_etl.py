@@ -25,7 +25,7 @@ spark.catalog.refreshTable("default.tfl_undergroundrecord")
 # Read data from Hive table
 try:
     df = spark.sql("SELECT * FROM default.tfl_undergroundrecord")
-    print(f"Table 'tfl_undergroundrecord' loaded successfully with {df.count()} rows.")
+    print("Table 'tfl_undergroundrecord' loaded successfully with {} rows.".format(df.count()))
 except Exception as e:
     print(f"Error reading table: {e}")
     spark.stop()
