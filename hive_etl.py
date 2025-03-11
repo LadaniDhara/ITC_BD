@@ -1,11 +1,11 @@
 from pyspark.sql import SparkSession
 from pyspark.sql.functions import col, upper
 
-# Create Spark Session with Hive support and explicit Hive Metastore configuration
+# Create Spark Session with Hive support
 spark = SparkSession.builder \
     .appName("TfL Underground ETL") \
-    .config("spark.sql.warehouse.dir", "/user/hive/warehouse") \
-    .config("spark.hadoop.hive.metastore.uris", "thrift://18.170.23.150:9083") \
+    # .config("spark.sql.warehouse.dir", "/user/hive/warehouse")  # Commented out
+    # .config("spark.hadoop.hive.metastore.uris", "thrift://18.170.23.150:9083")  # Commented out
     .enableHiveSupport() \
     .getOrCreate()
 
@@ -35,9 +35,9 @@ except Exception as e:
 transformed_df = df.withColumn("status", upper(col("status")))
 
 # Save transformed data to new Hive table
-transformed_df.write.mode("overwrite").saveAsTable("default.tfl_underground_result")
+transformed_df.write.mode("overwrite").saveAsTable("default.tfl_undergroundresult")
 
-print("✅ Transformation complete. Data saved to default.tfl_underground_result.")
+print("✅ Transformation complete. Data saved to default.tfl_undergroundresult.")
 
 # Stop Spark session
 spark.stop()
