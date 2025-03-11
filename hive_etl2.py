@@ -4,11 +4,10 @@ from pyspark.sql.functions import col, upper, monotonically_increasing_id
 from pyspark.sql import SparkSession
 
 spark = SparkSession.builder.master("local").appName("TfL Underground ETL").enableHiveSupport().getOrCreate()
-try:
-    df = spark.sql("SELECT * FROM default.tfl_undergroundrecord")
-    print("data successfully read")
-except Exception as e:
-    print("Error occurred during Hive operations")
+
+df = spark.sql("SELECT * FROM default.tfl_undergroundrecord")
+print("data successfully read")
+
 
 df_transformed = df.withColumn("status", upper(col("status"))) \
     .withColumn("record_id", monotonically_increasing_id() + 1)
