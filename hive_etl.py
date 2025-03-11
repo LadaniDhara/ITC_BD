@@ -4,10 +4,10 @@ from pyspark.sql.functions import col, upper
 # Create Spark Session with Hive support
 spark = SparkSession.builder \
     .appName("TfL Underground ETL") \
-    # .config("spark.sql.warehouse.dir", "/user/hive/warehouse")  # Commented out
-    # .config("spark.hadoop.hive.metastore.uris", "thrift://18.170.23.150:9083")  # Commented out
     .enableHiveSupport() \
     .getOrCreate()
+    # .config("spark.sql.warehouse.dir", "/user/hive/warehouse")  # Commented out
+    # .config("spark.hadoop.hive.metastore.uris", "thrift://18.170.23.150:9083")  # Commented out
 
 # Log available databases and tables to verify connection
 databases = spark.sql("SHOW DATABASES")
