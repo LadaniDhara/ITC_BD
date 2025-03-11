@@ -1,7 +1,6 @@
 from pyspark.sql import *
 from pyspark.sql.functions import *
-import pyspark.sql.functions as F
-from pyspark.sql.functions import col, upper
+from pyspark.sql.functions import col, upper, monotonically_increasing_id
 from pyspark.sql import SparkSession
 
 spark = SparkSession.builder.master("local").appName("TfL Underground ETL").enableHiveSupport().getOrCreate()
@@ -14,8 +13,11 @@ except Exception as e:
 # Example Transformation: Convert all status descriptions to uppercase
 df_transformed = df.withColumn("status", upper(col("status")))
 
+df_transformed = df_transformed.withColumn("status", upper(col("status"))) \
+    .withColumn("record_id", monotonically_increasing_id() + 1)
+
 try:
-    df_transformed.write.mode("overwrite").saveAsTable("default.tfl_undergroundresul")
+    df_transformed.write.mode("overwrite").saveAsTable("default.tfl_undergroundresult")
     print("Successfully Load to Hive")
 except Exception as e:
     print("Error occurred during Hive operations")
