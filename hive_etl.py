@@ -27,7 +27,7 @@ try:
     df = spark.sql("SELECT * FROM default.tfl_undergroundrecord")
     print("Table 'tfl_undergroundrecord' loaded successfully with {} rows.".format(df.count()))
 except Exception as e:
-    print(f"Error reading table: {e}")
+    print("Error reading table: {}".format(e))
     spark.stop()
     exit(1)
 
