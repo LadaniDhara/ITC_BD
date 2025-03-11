@@ -9,7 +9,7 @@ try:
     df = spark.sql("SELECT * FROM default.tfl_undergroundrecord")
     print("data successfully read")
 except Exception as e:
-    print(f"Error occurred during Hive operations: {e}")
+    print("Error occurred during Hive operations")
 
 # Example Transformation: Convert all status descriptions to uppercase
 df_transformed = df.withColumn("status", upper(col("status")))
@@ -18,4 +18,4 @@ try:
     df_transformed.write.mode("overwrite").saveAsTable("default.tfl_undergroundresul")
     print("Successfully Load to Hive")
 except Exception as e:
-    print(f"Error occurred during Hive operations: {e}")
+    print("Error occurred during Hive operations")
