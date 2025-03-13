@@ -2,7 +2,7 @@ pipeline {
     agent any
     environment {
         SCRIPT_NAME = "SendDataToKafka"
-        SCRIPT_PATH = "kafkaspark/SendDataToKafka.scala"
+        SCRIPT_PATH = "SendDataToKafka.scala"
         JAR_NAME = "SendDataToKafka.jar"
         MAIN_CLASS = "kafkaspark.SendDataToKafka"
     }
