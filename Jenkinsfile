@@ -18,7 +18,7 @@ pipeline {
         stage('Build') {
             steps {
                 echo "Compiling Scala application..."
-                sh "scalac -classpath $(hadoop classpath) -d ${JAR_NAME} ${SCRIPT_PATH}"
+                sh """scalac -classpath \$(hadoop classpath) -d ${JAR_NAME} ${SCRIPT_PATH}"""
             }
         }
         stage('Run') {
