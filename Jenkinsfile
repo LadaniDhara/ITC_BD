@@ -7,13 +7,14 @@ pipeline {
         stage('Build') {
             steps {
                 echo "Building the project..."
+                sh "scalac ${SCRIPT_PATH}"
             }
         }
         stage('Run Script') {
             steps {
                 script {
                     echo "Executing Scala script: ${SCRIPT_PATH}"
-                    sh "scala ${SCRIPT_PATH}"
+                    sh "scala kafkaspark.SendDatatoKafka"
                 }
             }
         }
