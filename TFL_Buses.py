@@ -13,7 +13,7 @@ HDFS_DIRECTORY = "/tmp/big_datajan2025/TFL/TFL_Buses"
 
 # Get current timestamp for file naming
 timestamp = datetime.now().strftime("%Y%m%d_%H%M")
-csv_filename = f"underground_{timestamp}.csv"
+csv_filename = f"Buses_{timestamp}.csv"
 local_csv_path = f"/tmp/{csv_filename}"  # Store locally before moving to HDFS
 hdfs_file_path = f"{HDFS_DIRECTORY}/{csv_filename}"
 
